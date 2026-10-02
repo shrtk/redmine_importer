@@ -17,7 +17,7 @@ jobs:
         ruby: ['3.4', '4.0']
     env:
       RAILS_ENV: test
-      BUNDLE_WITHOUT: development:ldap:minimagick
+      BUNDLE_WITHOUT: development:minimagick
     steps:
       - uses: actions/checkout@v4
         with:
