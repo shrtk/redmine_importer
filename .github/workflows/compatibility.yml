@@ -1,0 +1,44 @@
+name: Redmine compatibility
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['3.4', '4.0']
+    env:
+      RAILS_ENV: test
+      BUNDLE_WITHOUT: development:ldap:minimagick
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: redmine/redmine
+          ref: '7.0.0'
+      - uses: actions/checkout@v4
+        with:
+          path: plugins/redmine_importer
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Configure SQLite
+        run: |
+          printf 'test:\n  adapter: sqlite3\n  database: db/test.sqlite3\n' > config/database.yml
+      - name: Install dependencies
+        run: bundle install
+      - name: Migrate core and plugin
+        run: |
+          bundle exec rake db:migrate
+          bundle exec rake redmine:plugins:migrate
+      - name: Run plugin tests
+        run: bundle exec rake redmine:plugins:test NAME=redmine_importer
+      - name: Verify production eager loading
+        run: bundle exec rails runner 'Rails.application.eager_load!; abort "Settings patch missing" unless SettingsController < RedmineImporter::Patches::SettingsControllerPatch; puts "Eager loading passed"'
