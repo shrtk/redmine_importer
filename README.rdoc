@@ -4,20 +4,34 @@ User documentation for this plugin is
 at https://github.com/leovitch/redmine_importer/wiki.
 
 This plugin is functional now, including in multiprocess environments.
-The plugin has been tested on Redmine 4.1 or higher
+This fork targets Redmine 7.0.0 (Rails 8.1) with Ruby 3.4 and 4.0.
+GitHub Actions runs the plugin's unit and functional tests on both versions.
+Redmine 7.0.0 itself requires Ruby >= 3.2 and < 4.1; future Ruby versions
+are not supported until Redmine supports them and the test matrix passes.
+Ruby 4.0.4 or later in the 4.0 series is recommended by Redmine upstream.
+Older Redmine versions have not been verified by this fork's CI.
 The database is used for intermediate storage.
 
 To install:
-- Prerequisites: Unless you are using ruby-1.9, you'll need the fastercsv gem (<code>gem install fastercsv</code> as root).
-  Versions 1.4 through 1.5.3 are tested.
-- Download the plugin to your 'plugins/' directory.  Be sure to maintain the correct folder name, 'redmine_importer'.
-- Run <code>rake redmine:plugins:migrate RAILS_ENV=production</code>
-- Restart your redmine as appropriate (e.g., <code>ruby script/rails server -e production</code>)
+- From your Redmine directory, run <code>git clone https://github.com/shrtk/redmine_importer.git plugins/redmine_importer</code>.
+- Run <code>bundle install</code>. The plugin declares nkf and csv explicitly
+  because these libraries are no longer guaranteed to be installed with Ruby.
+- Run <code>bundle exec rake redmine:plugins:migrate RAILS_ENV=production</code>.
+- Restart your Redmine application server.
 - Go to the Admin/Projects/../Modules
 - Enable "Importer"
 
 en, de, zh, pt-BR, ru and ja localizations included.
 The other localizations are up to date, but the zh is a little bit behind.
 If anyone could update it, it would be appreciated.
+
+To run the tests from your Redmine directory:
+  RAILS_ENV=test bundle exec rake db:migrate
+  RAILS_ENV=test bundle exec rake redmine:plugins:migrate
+  RAILS_ENV=test bundle exec rake redmine:plugins:test NAME=redmine_importer
+
+The plugin's Gemfile.local is a legacy development helper, not an installation
+step. Do not copy it over Redmine's Gemfile.local: Redmine 7 already declares
+compatible Commonmarker and Nokogiri dependencies.
 
 User documentation at https://github.com/leovitch/redmine_importer/wiki.
